@@ -1,0 +1,16 @@
+# Secrets & sensitive data
+*.key
+*.pem
+*.token
+*.env
+.env*
+
+# Logs & temp files
+*.log
+/tmp/
+__pycache__/
+*.pyc
+
+# OS generated files
+.DS_Store
+Thumbs.db
