@@ -51,10 +51,18 @@ case "$1" in
             synosystemctl restart crond 2>/dev/null || synoservice --restart crond 2>/dev/null
         fi
 
-        # 5. Fix user home directory if required
-        if [ -n "$SUDO_USER" ] && [ ! -d "/var/services/homes/$SUDO_USER" ]; then
+        # 5. Restore Nginx reverse proxy for Grokbot if DSM update wiped sites-enabled
+        if [ ! -f /etc/nginx/sites-enabled/grokbot.conf ] && [ -f /usr/local/etc/grokbot-proxy.conf.bak ]; then
+            log "Restoring Nginx reverse proxy configuration..."
+            cp /usr/local/etc/grokbot-proxy.conf.bak /etc/nginx/sites-enabled/grokbot.conf
+            synosystemctl reload nginx 2>/dev/null || synoservice --reload nginx 2>/dev/null
+        fi
+
+        # 6. Ensure user homes directory exists
+        if [ -n "$SUDO_USER" ] && [ ! -d "/volume1/@fake_home_link/$SUDO_USER" ]; then
             mkdir -p "/volume1/@fake_home_link/$SUDO_USER" 2>/dev/null
             chown "$SUDO_USER:users" "/volume1/@fake_home_link/$SUDO_USER" 2>/dev/null
+            chmod 700 "/volume1/@fake_home_link/$SUDO_USER" 2>/dev/null
         fi
 
         log "=== Synology Gateway Boot Hook Completed ==="
